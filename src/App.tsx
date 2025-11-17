@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, FileText, Filter, Shield } from 'lucide-react';
+import { Search, FileText, Filter, Shield, Home } from 'lucide-react';
 import { supabase, type Lender } from './lib/supabase';
 import QualificationForm from './components/QualificationForm';
 import MatchResults from './components/MatchResults';
@@ -8,6 +8,7 @@ import LenderCard from './components/LenderCard';
 import FilterPanel from './components/FilterPanel';
 import Pagination from './components/Pagination';
 import ComplianceSection from './components/ComplianceSection';
+import LandingPage from './components/LandingPage';
 import { matchLenders } from './utils/lenderMatcher';
 
 interface CategoryFilter {
@@ -17,6 +18,12 @@ interface CategoryFilter {
 }
 
 interface RegionFilter {
+  name: string;
+  label: string;
+  keywords: string[];
+}
+
+interface CountryFilter {
   name: string;
   label: string;
   keywords: string[];
@@ -68,6 +75,30 @@ const REGION_FILTERS: RegionFilter[] = [
     label: 'Emerging Markets',
     keywords: ['Emerging', 'developing countries', 'EMs']
   }
+];
+
+const COUNTRY_FILTERS: CountryFilter[] = [
+  { name: 'all', label: 'All Countries', keywords: [] },
+  { name: 'australia', label: 'Australia', keywords: ['Australia'] },
+  { name: 'brazil', label: 'Brazil', keywords: ['Brazil'] },
+  { name: 'canada', label: 'Canada', keywords: ['Canada'] },
+  { name: 'china', label: 'China', keywords: ['China'] },
+  { name: 'colombia', label: 'Colombia', keywords: ['Colombia'] },
+  { name: 'finland', label: 'Finland', keywords: ['Finland'] },
+  { name: 'france', label: 'France', keywords: ['France'] },
+  { name: 'germany', label: 'Germany', keywords: ['Germany'] },
+  { name: 'india', label: 'India', keywords: ['India'] },
+  { name: 'italy', label: 'Italy', keywords: ['Italy'] },
+  { name: 'japan', label: 'Japan', keywords: ['Japan'] },
+  { name: 'mexico', label: 'Mexico', keywords: ['Mexico'] },
+  { name: 'netherlands', label: 'Netherlands', keywords: ['Netherlands'] },
+  { name: 'nigeria', label: 'Nigeria', keywords: ['Nigeria'] },
+  { name: 'pakistan', label: 'Pakistan', keywords: ['Pakistan'] },
+  { name: 'south-africa', label: 'South Africa', keywords: ['South Africa'] },
+  { name: 'south-korea', label: 'South Korea', keywords: ['South Korea', 'Korea'] },
+  { name: 'spain', label: 'Spain', keywords: ['Spain'] },
+  { name: 'uk', label: 'United Kingdom', keywords: ['UK', 'United Kingdom'] },
+  { name: 'us', label: 'United States', keywords: ['US', 'USA', 'United States'] }
 ];
 
 const CATEGORY_FILTERS: CategoryFilter[] = [
@@ -124,6 +155,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedRegion, setSelectedRegion] = useState<string>('all');
+  const [selectedCountry, setSelectedCountry] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [showQualificationForm, setShowQualificationForm] = useState(false);
   const [matchResults, setMatchResults] = useState<any[]>([]);
@@ -133,6 +165,7 @@ function App() {
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const [showFilters, setShowFilters] = useState(true);
   const [showCompliance, setShowCompliance] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     fetchLenders();
@@ -140,7 +173,7 @@ function App() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, selectedRegion]);
+  }, [searchTerm, selectedCategory, selectedRegion, selectedCountry]);
 
   useEffect(() => {
     let filtered = lenders;
@@ -169,6 +202,18 @@ function App() {
       }
     }
 
+    if (selectedCountry !== 'all') {
+      const country = COUNTRY_FILTERS.find(c => c.name === selectedCountry);
+      if (country && country.keywords.length > 0) {
+        filtered = filtered.filter(lender => {
+          const regionData = (lender.regions || lender.geographic_coverage || '').toLowerCase();
+          return country.keywords.some(keyword =>
+            regionData.includes(keyword.toLowerCase())
+          );
+        });
+      }
+    }
+
     if (searchTerm.trim() !== '') {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(lender =>
@@ -185,7 +230,7 @@ function App() {
     }
 
     setFilteredLenders(filtered);
-  }, [searchTerm, selectedCategory, selectedRegion, lenders]);
+  }, [searchTerm, selectedCategory, selectedRegion, selectedCountry, lenders]);
 
   const fetchLenders = async () => {
     try {
@@ -232,6 +277,20 @@ function App() {
     }).length;
   };
 
+  const getCountryCount = (countryName: string): number => {
+    if (countryName === 'all') return lenders.length;
+
+    const country = COUNTRY_FILTERS.find(c => c.name === countryName);
+    if (!country || country.keywords.length === 0) return 0;
+
+    return lenders.filter(lender => {
+      const regionData = (lender.regions || lender.geographic_coverage || '').toLowerCase();
+      return country.keywords.some(keyword =>
+        regionData.includes(keyword.toLowerCase())
+      );
+    }).length;
+  };
+
   const handleFormSubmit = async (formData: any) => {
     const matches = matchLenders(formData, lenders);
     setMatchResults(matches);
@@ -269,8 +328,23 @@ function App() {
     }
   };
 
+  if (showLanding) {
+    return <LandingPage onStartTrial={() => setShowLanding(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <button
+            onClick={() => setShowLanding(true)}
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors font-medium"
+          >
+            <Home className="w-5 h-5" />
+            Back to Home
+          </button>
+        </div>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center gap-3 mb-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl shadow-lg">
@@ -323,12 +397,16 @@ function App() {
             <FilterPanel
               categoryFilters={CATEGORY_FILTERS}
               regionFilters={REGION_FILTERS}
+              countryFilters={COUNTRY_FILTERS}
               selectedCategory={selectedCategory}
               selectedRegion={selectedRegion}
+              selectedCountry={selectedCountry}
               onCategoryChange={setSelectedCategory}
               onRegionChange={setSelectedRegion}
+              onCountryChange={setSelectedCountry}
               getCategoryCount={getCategoryCount}
               getRegionCount={getRegionCount}
+              getCountryCount={getCountryCount}
             />
           )}
         </div>
