@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, FileText, Filter, Shield, Home } from 'lucide-react';
+import { Search, FileText, Filter, Shield, Home, Bot } from 'lucide-react';
 import { supabase, type Lender } from './lib/supabase';
 import QualificationForm from './components/QualificationForm';
 import MatchResults from './components/MatchResults';
@@ -9,6 +9,7 @@ import FilterPanel from './components/FilterPanel';
 import Pagination from './components/Pagination';
 import ComplianceSection from './components/ComplianceSection';
 import LandingPage from './components/LandingPage';
+import FinFinderTradeAssistant from './components/FinFinderTradeAssistant';
 import { matchLenders } from './utils/lenderMatcher';
 
 interface CategoryFilter {
@@ -166,6 +167,7 @@ function App() {
   const [showFilters, setShowFilters] = useState(true);
   const [showCompliance, setShowCompliance] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
+  const [showFinFinder, setShowFinFinder] = useState(false);
 
   useEffect(() => {
     fetchLenders();
@@ -329,7 +331,15 @@ function App() {
   };
 
   if (showLanding) {
-    return <LandingPage onStartTrial={() => setShowLanding(false)} />;
+    return (
+      <LandingPage
+        onStartTrial={() => setShowLanding(false)}
+        onStartFinFinder={() => {
+          setShowLanding(false);
+          setShowFinFinder(true);
+        }}
+      />
+    );
   }
 
   return (
@@ -356,6 +366,13 @@ function App() {
             Search and compare DFIs, development banks, private equity, and commercial lending options worldwide
           </p>
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => setShowFinFinder(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium shadow-lg hover:shadow-xl"
+            >
+              <Bot className="w-5 h-5" />
+              FinFinder Trade Assistant
+            </button>
             <button
               onClick={() => setShowQualificationForm(true)}
               className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg hover:shadow-xl"
@@ -513,6 +530,16 @@ function App() {
             <ComplianceSection />
           </div>
         </div>
+      )}
+
+      {showFinFinder && (
+        <FinFinderTradeAssistant
+          onClose={() => setShowFinFinder(false)}
+          onMatchLenders={(productType, scenario) => {
+            setShowFinFinder(false);
+            setShowQualificationForm(true);
+          }}
+        />
       )}
 
       <Footer />

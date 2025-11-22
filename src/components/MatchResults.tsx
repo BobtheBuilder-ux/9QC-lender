@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { ExternalLink, Award, CheckCircle2, FileText, MessageCircle, HelpCircle } from 'lucide-react';
+import { ExternalLink, Award, CheckCircle2, FileText, MessageCircle, HelpCircle, FileCheck } from 'lucide-react';
 import AssistantPanel from './AssistantPanel';
 import ConversationalAssistant from './ConversationalAssistant';
+import TradeFinanceChecklistAssistant from './TradeFinanceChecklistAssistant';
+import { supabase } from '../lib/supabase';
+import { createChecklistRequest } from '../utils/checklistGenerator';
 
 interface MatchedLender {
   id: string;
@@ -28,10 +31,71 @@ export default function MatchResults({ matches, onClose, formData, allLenders = 
   const [showAssistant, setShowAssistant] = useState(false);
   const [selectedLender, setSelectedLender] = useState<MatchedLender | null>(null);
   const [showChatAssistant, setShowChatAssistant] = useState(false);
+  const [checklistRequestId, setChecklistRequestId] = useState<string | null>(null);
 
   const openAssistant = (lender: MatchedLender) => {
     setSelectedLender(lender);
     setShowAssistant(true);
+  };
+
+  const handleViewChecklist = async (lender: MatchedLender) => {
+    try {
+      if (!formData?.id) {
+        console.error('No qualification form ID available');
+        return;
+      }
+
+      const productType = formData.preferred_financing_instrument?.[0] || 'Letter of Credit';
+
+      const checklistData = await createChecklistRequest(
+        formData.id,
+        lender.id,
+        {
+          productType,
+          companyName: formData.business_name || 'Your Company',
+          country: formData.country_of_operation || 'Unknown',
+          industry: formData.industry_sector || 'Unknown',
+          yearsInOperation: formData.years_in_operation || '1-2 years',
+          lenderName: lender.name,
+          amount: parseInt(formData.funding_amount?.replace(/[^\d]/g, '') || '100000'),
+          currency: 'USD',
+          tradeCounterparty: formData.trading_partner_country
+        }
+      );
+
+      const { data: request, error: requestError } = await supabase
+        .from('checklist_requests')
+        .insert({
+          qualification_form_id: checklistData.qualification_form_id,
+          lender_id: checklistData.lender_id,
+          product_type: checklistData.product_type,
+          amount: checklistData.amount,
+          currency: checklistData.currency,
+          trade_counterparty_info: checklistData.trade_counterparty_info,
+          checklist_data: checklistData.checklist_data
+        })
+        .select()
+        .single();
+
+      if (requestError) throw requestError;
+
+      if (request && checklistData.documents) {
+        const documentsToInsert = checklistData.documents.map(doc => ({
+          checklist_request_id: request.id,
+          ...doc
+        }));
+
+        const { error: docsError } = await supabase
+          .from('checklist_documents')
+          .insert(documentsToInsert);
+
+        if (docsError) throw docsError;
+
+        setChecklistRequestId(request.id);
+      }
+    } catch (error) {
+      console.error('Error creating checklist:', error);
+    }
   };
 
   return (
@@ -129,6 +193,13 @@ export default function MatchResults({ matches, onClose, formData, allLenders = 
                                 <HelpCircle className="w-4 h-4" />
                                 Get Help
                               </button>
+                              <button
+                                onClick={() => handleViewChecklist(lender)}
+                                className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium whitespace-nowrap"
+                              >
+                                <FileCheck className="w-4 h-4" />
+                                Document Checklist
+                              </button>
                             </div>
                           </div>
                         </div>
@@ -222,6 +293,13 @@ export default function MatchResults({ matches, onClose, formData, allLenders = 
         financialInstitution={selectedLender.name}
         fiProfile={selectedLender.type}
         onClose={() => setShowAssistant(false)}
+      />
+    )}
+
+    {checklistRequestId && (
+      <TradeFinanceChecklistAssistant
+        checklistRequestId={checklistRequestId}
+        onClose={() => setChecklistRequestId(null)}
       />
     )}
 

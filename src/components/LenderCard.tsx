@@ -1,12 +1,13 @@
-import { DollarSign, MapPin, Clock, TrendingUp, Briefcase, Award } from 'lucide-react';
+import { DollarSign, MapPin, Clock, TrendingUp, Briefcase, Award, FileCheck } from 'lucide-react';
 import { Lender } from '../lib/supabase';
 
 interface LenderCardProps {
   lender: Lender;
   allLenders: Lender[];
+  onViewChecklist?: (lender: Lender) => void;
 }
 
-export default function LenderCard({ lender }: LenderCardProps) {
+export default function LenderCard({ lender, onViewChecklist }: LenderCardProps) {
   const displayLoanSize = lender.typical_ticket || lender.typical_loan_size;
   const displayRegions = lender.regions || lender.geographic_coverage;
 
@@ -122,6 +123,18 @@ export default function LenderCard({ lender }: LenderCardProps) {
           </div>
         )}
       </div>
+
+      {onViewChecklist && (
+        <div className="mt-6 pt-4 border-t border-slate-200">
+          <button
+            onClick={() => onViewChecklist(lender)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+          >
+            <FileCheck className="w-5 h-5" />
+            View Document Checklist
+          </button>
+        </div>
+      )}
     </div>
   );
 }

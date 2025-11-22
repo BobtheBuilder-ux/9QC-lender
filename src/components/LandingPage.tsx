@@ -1,10 +1,18 @@
-import { Check, ArrowRight, Shield, Clock, FileCheck, TrendingUp, Users, Sparkles } from 'lucide-react';
+import { Check, ArrowRight, Shield, Clock, FileCheck, TrendingUp, Users, Sparkles, Bot } from 'lucide-react';
 
 interface LandingPageProps {
   onStartTrial: () => void;
+  onStartFinFinder?: () => void;
 }
 
-export default function LandingPage({ onStartTrial }: LandingPageProps) {
+export default function LandingPage({ onStartTrial, onStartFinFinder }: LandingPageProps) {
+  const scrollToPricing = () => {
+    const pricingSection = document.getElementById('pricing');
+    if (pricingSection) {
+      pricingSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white overflow-hidden">
@@ -26,6 +34,15 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              {onStartFinFinder && (
+                <button
+                  onClick={onStartFinFinder}
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-bold text-lg shadow-2xl hover:shadow-xl hover:scale-105 transform"
+                >
+                  <Bot className="w-5 h-5" />
+                  Try FinFinder AI
+                </button>
+              )}
               <button
                 onClick={onStartTrial}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-all font-bold text-lg shadow-2xl hover:shadow-xl hover:scale-105 transform"
@@ -34,7 +51,10 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
                 <ArrowRight className="w-5 h-5" />
               </button>
 
-              <button className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg hover:bg-white/10 transition-all font-bold text-lg">
+              <button
+                onClick={scrollToPricing}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg hover:bg-white/10 transition-all font-bold text-lg"
+              >
                 View Pricing
               </button>
             </div>
@@ -50,7 +70,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-300" />
-                <span>150+ Canadian lenders</span>
+                <span>150+ open sourced lenders</span>
               </div>
             </div>
           </div>
@@ -61,7 +81,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
-              How CapitalMatch Helps Your Business Get Funded
+              How 9QC CapitalMatch Helps Your Business Get Funded
             </h2>
           </div>
 
@@ -125,7 +145,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
-              Everything You Need to Secure Financing
+              Everything You Need to Find a Financing Match
             </h2>
           </div>
 
@@ -168,22 +188,6 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
               <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">
-                      Funding Pipeline Dashboard
-                    </h3>
-                    <p className="text-slate-700">
-                      Track every match, application, and approval.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Check className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -206,7 +210,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-slate-900 mb-2">
-                      150+ Verified Lenders
+                      150+ Open Sourced Lenders
                     </h3>
                     <p className="text-slate-700">
                       Banks, fintechs, alt lenders, equipment financiers.
@@ -239,7 +243,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
-              Trusted by SMEs Across Canada
+              Trusted by SMEs Across North America, Europe, EMEA
             </h2>
           </div>
 
@@ -277,7 +281,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
         </div>
       </section>
 
-      <section className="py-20 bg-white">
+      <section id="pricing" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
@@ -290,11 +294,11 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
               <div className="absolute top-4 right-4 bg-green-400 text-green-900 px-3 py-1 rounded-full text-xs font-bold">
                 BEST VALUE
               </div>
-              <h3 className="text-2xl font-bold mb-2">CapitalMatch Pro</h3>
+              <h3 className="text-2xl font-bold mb-2">9QC CapitalMatch Pro</h3>
               <div className="text-sm text-blue-200 mb-4">Annual</div>
               <div className="mb-6">
-                <div className="text-5xl font-black mb-2">$290<span className="text-2xl">/year</span></div>
-                <div className="text-blue-200">save 20%</div>
+                <div className="text-5xl font-black mb-2">$150<span className="text-2xl">/year</span></div>
+                <div className="text-blue-200">save 17%</div>
               </div>
               <div className="mb-6 p-4 bg-white/10 rounded-lg backdrop-blur-sm">
                 <div className="font-bold mb-1">7-day free trial → $0 today</div>
@@ -309,10 +313,10 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
             </div>
 
             <div className="bg-white rounded-2xl p-8 border-2 border-slate-200 shadow-lg hover:shadow-xl transition-shadow">
-              <h3 className="text-2xl font-bold mb-2 text-slate-900">CapitalMatch Pro</h3>
+              <h3 className="text-2xl font-bold mb-2 text-slate-900">9QC CapitalMatch Pro</h3>
               <div className="text-sm text-slate-600 mb-4">Monthly</div>
               <div className="mb-6">
-                <div className="text-5xl font-black text-slate-900 mb-2">$29<span className="text-2xl">/month</span></div>
+                <div className="text-5xl font-black text-slate-900 mb-2">$18<span className="text-2xl">/month</span></div>
                 <div className="text-slate-600">Cancel anytime</div>
               </div>
               <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
@@ -338,8 +342,8 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
             </h2>
           </div>
 
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 mb-12">
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Check className="w-6 h-6 text-green-600 flex-shrink-0" />
@@ -361,6 +365,25 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
                   <Check className="w-6 h-6 text-green-600 flex-shrink-0" />
                   <span className="text-slate-700">We do not lend — we help you match only</span>
                 </div>
+              </div>
+            </div>
+
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-slate-900 mb-8">Trusted & Verified</h3>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center">
+              <div className="flex items-center justify-center p-4">
+                <img src="/customer-choice-logo.png" alt="Customer Choice" className="h-16 w-auto object-contain" />
+              </div>
+              <div className="flex items-center justify-center p-4">
+                <img src="/pngtree-customer-centric-business-concept-stamp-grunge-photo-png-image_13794443.png" alt="Customer Centric" className="h-20 w-auto object-contain" />
+              </div>
+              <div className="flex items-center justify-center p-4">
+                <img src="/pipeda.png" alt="PIPEDA Compliant" className="h-16 w-auto object-contain" />
+              </div>
+              <div className="flex items-center justify-center p-4">
+                <img src="/ffff.png" alt="Verified Business" className="h-16 w-auto object-contain" />
               </div>
             </div>
           </div>
@@ -426,7 +449,7 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
           </h2>
 
           <p className="text-xl sm:text-2xl mb-10 text-blue-100 max-w-2xl mx-auto">
-            Join thousands of SMEs using CapitalMatch to secure loans faster.
+            Join thousands of SMEs using 9QC CapitalMatch to secure loans faster.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -444,21 +467,6 @@ export default function LandingPage({ onStartTrial }: LandingPageProps) {
           </div>
         </div>
       </section>
-
-      <footer className="bg-slate-900 text-slate-300 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-6 mb-8 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Home</a>
-            <a href="#" className="hover:text-white transition-colors">Pricing</a>
-            <a href="#" className="hover:text-white transition-colors">FAQ</a>
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
-          </div>
-          <div className="text-center text-sm">
-            © 2025 9QC CapitalMatch — A service by 9QC INC.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
